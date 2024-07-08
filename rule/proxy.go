@@ -69,12 +69,24 @@ func NewProxy(mainForwarders []string, mainStrategy *Strategy, rules []*Config) 
 
 // Dial dials to targer addr and return a conn.
 func (p *Proxy) Dial(network, addr string) (net.Conn, proxy.Dialer, error) {
-	return p.findDialer(addr).Dial(network, addr)
+	sp := strings.SplitN(addr, "@@", 2)
+	addr_ := sp[0]
+	identify_ := ""
+	if len(sp) == 2 {
+		identify_ = sp[1]
+	}
+	return p.findDialer(sp[0]).Dial(network, addr_, identify_)
 }
 
 // DialUDP connects to the given address via the proxy.
 func (p *Proxy) DialUDP(network, addr string) (pc net.PacketConn, dialer proxy.UDPDialer, err error) {
-	return p.findDialer(addr).DialUDP(network, addr)
+	sp := strings.SplitN(addr, "@@", 2)
+	addr_ := sp[0]
+	identify_ := ""
+	if len(sp) == 2 {
+		identify_ = sp[1]
+	}
+	return p.findDialer(addr).DialUDP(network, addr_, identify_)
 }
 
 // findDialer returns a dialer by dstAddr according to rule.
@@ -119,7 +131,7 @@ func (p *Proxy) findDialer(dstAddr string) *FwdrGroup {
 
 // NextDialer returns next dialer according to rule.
 func (p *Proxy) NextDialer(dstAddr string) proxy.Dialer {
-	return p.findDialer(dstAddr).NextDialer(dstAddr)
+	return p.findDialer(dstAddr).NextDialer(dstAddr, "")
 }
 
 // Record records result while using the dialer from proxy.

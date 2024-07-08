@@ -102,21 +102,21 @@ func newFwdrGroup(name string, fwdrs []*Forwarder, c *Strategy) *FwdrGroup {
 }
 
 // Dial connects to the address addr on the network net.
-func (p *FwdrGroup) Dial(network, addr string) (net.Conn, proxy.Dialer, error) {
-	nd := p.NextDialer(addr)
+func (p *FwdrGroup) Dial(network, addr, identify string) (net.Conn, proxy.Dialer, error) {
+	nd := p.NextDialer(addr, identify)
 	c, err := nd.Dial(network, addr)
 	return c, nd, err
 }
 
 // DialUDP connects to the given address.
-func (p *FwdrGroup) DialUDP(network, addr string) (pc net.PacketConn, dialer proxy.UDPDialer, err error) {
-	nd := p.NextDialer(addr)
+func (p *FwdrGroup) DialUDP(network, addr, identify string) (pc net.PacketConn, dialer proxy.UDPDialer, err error) {
+	nd := p.NextDialer(addr, identify)
 	pc, err = nd.DialUDP(network, addr)
 	return pc, nd, err
 }
 
 // NextDialer returns the next dialer.
-func (p *FwdrGroup) NextDialer(dstAddr string) proxy.Dialer {
+func (p *FwdrGroup) NextDialer(dstAddr, identify string) proxy.Dialer {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
@@ -124,7 +124,7 @@ func (p *FwdrGroup) NextDialer(dstAddr string) proxy.Dialer {
 		return p.fwdrs[atomic.AddUint32(&p.index, 1)%uint32(len(p.fwdrs))]
 	}
 
-	return p.next(dstAddr)
+	return p.next(dstAddr + "@@" + identify)
 }
 
 // Priority returns the active priority of dialer.
