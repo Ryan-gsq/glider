@@ -83,7 +83,7 @@ func (s *HTTP) servRequest(req *request, c *proxy.Conn) {
 }
 
 func (s *HTTP) servHTTPS(r *request, c net.Conn) {
-	rc, dialer, err := s.proxy.Dial("tcp", r.uri)
+	rc, dialer, err := s.proxy.Dial("tcp", r.target+"@@"+r.header.Get("user-agent"))
 	if err != nil {
 		io.WriteString(c, r.proto+" 502 ERROR\r\n\r\n")
 		log.F("[http] %s <-> %s [c] via %s, error in dial: %v", c.RemoteAddr(), r.uri, dialer.Addr(), err)
@@ -105,7 +105,7 @@ func (s *HTTP) servHTTPS(r *request, c net.Conn) {
 }
 
 func (s *HTTP) servHTTP(req *request, c *proxy.Conn) {
-	rc, dialer, err := s.proxy.Dial("tcp", req.target)
+	rc, dialer, err := s.proxy.Dial("tcp", req.target+"@@"+req.header.Get("user-agent"))
 	if err != nil {
 		fmt.Fprintf(c, "%s 502 ERROR\r\n\r\n", req.proto)
 		log.F("[http] %s <-> %s via %s, error in dial: %v", c.RemoteAddr(), req.target, dialer.Addr(), err)
