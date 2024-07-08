@@ -75,7 +75,7 @@ func (p *Proxy) Dial(network, addr string) (net.Conn, proxy.Dialer, error) {
 	if len(sp) == 2 {
 		identify_ = sp[1]
 	}
-	return p.findDialer(sp[0]).Dial(network, addr_, identify_)
+	return p.findDialer(addr_).Dial(network, addr_, identify_)
 }
 
 // DialUDP connects to the given address via the proxy.
@@ -86,7 +86,7 @@ func (p *Proxy) DialUDP(network, addr string) (pc net.PacketConn, dialer proxy.U
 	if len(sp) == 2 {
 		identify_ = sp[1]
 	}
-	return p.findDialer(addr).DialUDP(network, addr_, identify_)
+	return p.findDialer(addr_).DialUDP(network, addr_, identify_)
 }
 
 // findDialer returns a dialer by dstAddr according to rule.
